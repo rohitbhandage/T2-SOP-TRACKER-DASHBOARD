@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call Audit Dashboard — Square Yards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+    --text: #1A1A1A;
+    --text-2: #5C5C5C;
+    --text-3: #9A9A9A;
+    --green: #16A36A;
+    --green-bg: #E8F8F1;
+    --green-text: #0F7A4F;
+    --amber: #D97706;
+    --amber-bg: #FEF3C7;
+    --amber-text: #92400E;
+    --red: #DC2626;
+    --red-bg: #FEE2E2;
+    --red-text: #991B1B;
+    --blue: #2563EB;
+    --blue-bg: #EFF6FF;
+    --blue-text: #1E40AF;
+    --accent: #1A1A1A;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Inter Tight', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-2);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    transition: background .3s;
+  }
+
+  .status-dot.loading { background: var(--amber); animation: pulse 1.2s ease-in-out infinite; }
+  .status-dot.error { background: var(--red); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  #lastUpdate { font-size: 11px; color: var(--text-3); }
+
+  .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-2);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background .15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .refresh-btn:hover { background: var(--bg); }
+
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+  .main { max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; }
+
+  .page-title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .page-sub { font-size: 13px; color: var(--text-2); margin-bottom: 20px; }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .controls select, .controls input {
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+
+  .controls select:focus, .controls input:focus { border-color: var(--blue); }
+  .controls input { width: 180px; }
+
+  .sort-label { font-size: 12px; color: var(--text-3); margin-left: 4px; }
+
+  .sort-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .pill {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all .15s;
+  }
+
+  .pill:hover { background: var(--bg); }
+  .pill.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .kpi-label { font-size: 11px; color: var(--text-3); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .kpi-value { font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+  .kpi-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .count-badge {
+    font-size: 11px;
+    color: var(--text-3);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 2px 8px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .card:hover { border-color: var(--border-strong); box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+
+  .card-identity { display: flex; align-items: center; gap: 10px; }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .card-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .card-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+  .rating-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+
+  .rating-good { background: var(--green-bg); color: var(--green-text); }
+  .rating-avg { background: var(--amber-bg); color: var(--amber-text); }
+  .rating-low { background: var(--red-bg); color: var(--red-text); }
+
+  .score-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+  }
+
+  .score-left { font-size: 12px; color: var(--text-2); }
+  .score-big { font-family: 'Inter Tight', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+  .score-denom { font-size: 12px; color: var(--text-3); }
+  .score-pct { font-size: 12px; color: var(--text-3); }
+
+  .audit-count-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .audit-count-label { font-size: 12px; color: var(--text-3); }
+  .audit-count-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 1px 8px;
+  }
+
+  .metrics { display: grid; gap: 7px; }
+
+  .metric-row { display: flex; align-items: center; gap: 8px; }
+
+  .metric-name {
+    font-size: 11px;
+    color: var(--text-2);
+    width: 88px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 5px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+
+  .metric-score {
+    font-size: 11px;
+    font-weight: 600;
+    width: 30px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-3);
+    font-size: 14px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-3);
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 0 16px; }
+    .main { padding: 16px 16px 40px; }
+    .grid { grid-template-columns: 1fr; }
+    .controls { gap: 6px; }
+    .controls input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    Call Audit Dashboard
+  </div>
+  <div class="header-right">
+    <span id="lastUpdate"></span>
+    <div class="status-chip">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Loading…</span>
+    </div>
+    <button class="refresh-btn" onclick="fetchAndRender()">
+      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-title">3 Mins+ Call Audits</div>
+  <div class="page-sub">Individual RM scorecards — audit count &amp; average score per metric · Week of 17–18 June 2026</div>
+
+  <div class="summary-row" id="summaryRow">
+    <div class="kpi"><div class="kpi-label">Total RMs</div><div class="kpi-value" id="kRMs">—</div></div>
+    <div class="kpi"><div class="kpi-label">Total audits</div><div class="kpi-value" id="kAudits">—</div></div>
+    <div class="kpi"><div class="kpi-label">Grand avg score</div><div class="kpi-value" id="kAvg">—</div></div>
+    <div class="kpi"><div class="kpi-label">Top performer</div><div class="kpi-value" id="kTop" style="font-size:15px;padding-top:5px;">—</div></div>
+    <div class="kpi"><div class="kpi-label">Needs coaching</div><div class="kpi-value" id="kLow" style="font-size:15px;padding-top:5px;">—</div></div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search RM…" oninput="render()">
+    <select id="t3f" onchange="render()">
+      <option value="all">All T3 managers</option>
+      <option value="k.bhat">k.bhat (K Bhat)</option>
+      <option value="rohit.raj">rohit.raj (Rohit Raj)</option>
+    </select>
+    <select id="t2f" onchange="render()"><option value="all">All T2 leads</option></select>
+    <select id="datef" onchange="render()"><option value="all">All dates</option></select>
+    <select id="intv" onchange="scheduleRefresh()" style="margin-left:auto;">
+      <option value="60">Auto-refresh: 1 min</option>
+      <option value="300">Auto-refresh: 5 min</option>
+      <option value="0">Manual only</option>
+    </select>
+  </div>
+
+  <div class="controls" style="margin-top:-12px;margin-bottom:20px;">
+    <span class="sort-label">Sort by:</span>
+    <div class="sort-pills">
+      <button class="pill active" onclick="setSort('total')" id="ps-total">Overall score</button>
+      <button class="pill" onclick="setSort('audits')" id="ps-audits">Audit count</button>
+      <button class="pill" onclick="setSort('sv')" id="ps-sv">Push SV</button>
+      <button class="pill" onclick="setSort('rapport')" id="ps-rapport">Rapport</button>
+      <button class="pill" onclick="setSort('obj')" id="ps-obj">Objection hdl</button>
+      <button class="pill" onclick="setSort('intro')" id="ps-intro">Introduction</button>
+      <button class="pill" onclick="setSort('name')" id="ps-name">Name A–Z</button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">RM Scorecards</span>
+    <span class="count-badge" id="cardCount">—</span>
+  </div>
+
+  <div class="grid" id="grid">
+    <div class="empty-state">Fetching data from Google Sheets…</div>
+  </div>
+</main>
+
+<footer>
+  Square Yards · Call Audit Dashboard · Data sourced from Google Sheets · Auto-refreshes every minute
+</footer>
+
+<script>
+const SHEET_ID = '1hKupVCRggdSF-zFcsJljRT8Qm3BuWEpAMtQ6cv9ZZ54';
+const GID = '1496052796';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+
+const PARAMS = ['intro','micro','loc','prod','rapport','obj','sv'];
+const PLABELS = ['Introduction','Micro-market','Location','Product','Rapport','Objection hdl','Push SV'];
+const MAX_SCORE = 3;
+
+const T2L = {
+  'kopal.jain':'Kopal Jain','jagadeesh.k':'Jagadeesh K','vishal.nayak':'Vishal Nayak',
+  'kiran.m6':'Kiran M','siddharth.panwar':'Siddharth P','mohammed.khan2':'Mohd Khan','mohammed.nawaz':'Mohd Nawaz'
+};
+
+const AVATAR_PALETTES = [
+  {bg:'#EFF6FF',tx:'#1E40AF'},{bg:'#F0FDF4',tx:'#166534'},{bg:'#FFF7ED',tx:'#9A3412'},
+  {bg:'#FDF4FF',tx:'#6B21A8'},{bg:'#FFF1F2',tx:'#9F1239'},{bg:'#F0FDFA',tx:'#134E4A'},
+  {bg:'#FEFCE8',tx:'#854D0E'},{bg:'#F8F4EE',tx:'#44403C'}
+];
+
+let allData = [];
+let sortKey = 'total';
+let refreshTimer = null;
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot' + (state === 'ok' ? '' : state === 'loading' ? ' loading' : ' error');
+  txt.textContent = msg;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (!lines.length) return [];
+  const rows = [];
+  let headerIdx = -1;
+  let headers = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i]);
+    const lower = cells.map(c => c.toLowerCase().trim());
+    if (lower.includes('date') && lower.includes('rm name') && lower.includes('introduction')) {
+      headerIdx = i;
+      headers = lower;
+      continue;
+    }
+    if (headerIdx === -1) continue;
+    if (cells.length < 8) continue;
+
+    const get = (col) => {
+      const idx = headers.indexOf(col);
+      return idx >= 0 ? (cells[idx] || '').trim() : '';
+    };
+
+    const toNum = (v) => { const n = parseInt(v); return isNaN(n) ? 0 : Math.max(0, Math.min(3, n)); };
+    const date = get('date');
+    if (!date || !/\d{2}-[a-z]{3}/i.test(date)) continue;
+
+    const rm = get('rm name').split('@')[0];
+    const t2 = get('t2').split('@')[0];
+    const t3 = get('t3').split('@')[0];
+    const intro = toNum(get('introduction'));
+    const micro = toNum(get('micro-market') || get('micro_market') || get('micro market'));
+    const loc = toNum(get('location explanation') || get('location_explanation'));
+    const prod = toNum(get('product explanation') || get('product_explanation'));
+    const rapport = toNum(get('over all rapport') || get('overall rapport') || get('over_all_rapport'));
+    const obj = toNum(get('objection handling') || get('objection_handling'));
+    const sv = toNum(get('push for sv') || get('push_for_sv'));
+
+    if (!rm || (intro + micro + loc + prod + rapport + obj + sv) === 0) continue;
+    rows.push({ date, rm, t2, t3, intro, micro, loc, prod, rapport, obj, sv });
+  }
+
+  return rows;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+async function fetchAndRender() {
+  setStatus('loading', 'Fetching…');
+  document.getElementById('refreshIcon').classList.add('spin');
+  try {
+    const res = await fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    if (!parsed.length) throw new Error('No audit rows found — check sheet is public');
+    allData = parsed;
+    const t = new Date();
+    document.getElementById('lastUpdate').textContent = 'Updated ' + t.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    setStatus('ok', 'Live · ' + parsed.length + ' records');
+    populateFilters();
+    render();
+  } catch (e) {
+    console.warn('Fetch error:', e.message);
+    if (allData.length) {
+      setStatus('error', 'Fetch failed — showing cached data');
+      render();
+    } else {
+      loadFallback();
+    }
+  } finally {
+    document.getElementById('refreshIcon').classList.remove('spin');
+  }
+}
+
+function loadFallback() {
+  allData = [
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'lakshmi.sajeevan',intro:1,micro:1,loc:1,prod:0,rapport:0,obj:0,sv:0},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'lakshmi.sajeevan',intro:1,micro:0,loc:1,prod:0,rapport:0,obj:0,sv:0},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'sriyansh.bhardwaj',intro:2,micro:1,loc:2,prod:2,rapport:2,obj:2,sv:1},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'paramita.datta',intro:1,micro:0,loc:0,prod:0,rapport:0,obj:0,sv:0},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'tanya.thakkar',intro:2,micro:1,loc:3,prod:1,rapport:2,obj:2,sv:0},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'tanya.thakkar',intro:2,micro:2,loc:2,prod:2,rapport:2,obj:2,sv:2},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'payal.verma',intro:2,micro:0,loc:2,prod:2,rapport:2,obj:1,sv:1},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'payal.verma',intro:2,micro:2,loc:3,prod:3,rapport:2,obj:2,sv:2},
+    {date:'17-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'ananya.sharma',intro:2,micro:2,loc:2,prod:1,rapport:2,obj:3,sv:1},
+    {date:'17-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'veeresha.g',intro:1,micro:2,loc:2,prod:0,rapport:0,obj:1,sv:1},
+    {date:'17-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'vanguri.ezra',intro:1,micro:2,loc:2,prod:3,rapport:2,obj:2,sv:2},
+    {date:'17-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'keerthana.k1',intro:1,micro:1,loc:2,prod:0,rapport:0,obj:2,sv:3},
+    {date:'17-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'pooja.singh4',intro:1,micro:2,loc:1,prod:2,rapport:2,obj:0,sv:0},
+    {date:'17-Jun',t2:'vishal.nayak',t3:'k.bhat',rm:'naveen.c60',intro:3,micro:2,loc:2,prod:3,rapport:2,obj:2,sv:0},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'vedant.mehar',intro:1,micro:1,loc:2,prod:1,rapport:2,obj:1,sv:2},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'akhil.raj',intro:1,micro:1,loc:1,prod:1,rapport:2,obj:1,sv:1},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'akhil.raj',intro:1,micro:1,loc:2,prod:1,rapport:1,obj:1,sv:2},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'bestin.sebastian',intro:1,micro:0,loc:2,prod:1,rapport:0,obj:0,sv:0},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'bestin.sebastian',intro:2,micro:0,loc:1,prod:1,rapport:1,obj:1,sv:2},
+    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'dibya.mohapatra',intro:0,micro:0,loc:1,prod:1,rapport:1,obj:0,sv:1},
+    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'ravikar.kumar23',intro:1,micro:1,loc:1,prod:1,rapport:2,obj:1,sv:1},
+    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'chetan.patil1',intro:1,micro:2,loc:1,prod:1,rapport:2,obj:1,sv:2},
+    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'chetan.patil1',intro:2,micro:2,loc:2,prod:2,rapport:2,obj:2,sv:3},
+    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'swarnali.karmakar',intro:1,micro:0,loc:1,prod:1,rapport:1,obj:0,sv:1},
+    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'gopu.krishnan',intro:2,micro:1,loc:0,prod:1,rapport:1,obj:1,sv:0},
+    {date:'17-Jun',t2:'mohammed.khan2',t3:'rohit.raj',rm:'sachin.bangera',intro:1,micro:2,loc:1,prod:1,rapport:2,obj:0,sv:0},
+    {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:2,micro:1,loc:2,prod:1,rapport:1,obj:1,sv:0},
+    {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:2,micro:2,loc:2,prod:2,rapport:3,obj:2,sv:3},
+    {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:3,micro:2,loc:2,prod:2,rapport:3,obj:3,sv:2},
+    {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'payal.verma',intro:2,micro:1,loc:2,prod:1,rapport:2,obj:2,sv:1},
+    {date:'18-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'vanguri.ezra',intro:1,micro:2,loc:1,prod:2,rapport:1,obj:2,sv:3},
+    {date:'18-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'krish.choudhary',intro:1,micro:1,loc:2,prod:1,rapport:3,obj:2,sv:0},
+    {date:'18-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'dibya.mohapatra',intro:2,micro:1,loc:2,prod:2,rapport:2,obj:2,sv:1},
+    {date:'18-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'swarnali.karmakar',intro:1,micro:2,loc:2,prod:2,rapport:2,obj:2,sv:2},
+    {date:'18-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'swarnali.karmakar',intro:2,micro:3,loc:3,prod:3,rapport:3,obj:2,sv:2},
+    {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'ananya.sharma',intro:2,micro:2,loc:2,prod:3,rapport:3,obj:3,sv:2},
+    {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'tanya.thakkar',intro:2,micro:2,loc:2,prod:2,rapport:2,obj:2,sv:2},
+    {date:'18-Jun',t2:'mohammed.khan2',t3:'rohit.raj',rm:'sachin.bangera',intro:1,micro:1,loc:1,prod:1,rapport:1,obj:0,sv:1},
+    {date:'18-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'chetan.patil1',intro:1,micro:2,loc:2,prod:1,rapport:1,obj:1,sv:3},
+    {date:'18-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'gopu.krishnan',intro:2,micro:1,loc:2,prod:1,rapport:2,obj:2,sv:2},
+    {date:'18-Jun',t2:'mohammed.khan2',t3:'rohit.raj',rm:'harshit.singh1',intro:1,micro:2,loc:1,prod:1,rapport:1,obj:1,sv:1},
+  ];
+  setStatus('error', 'Sheet not public — showing cached data');
+  populateFilters();
+  render();
+}
+
+function populateFilters() {
+  const t2s = [...new Set(allData.map(r => r.t2).filter(Boolean))].sort();
+  const t2el = document.getElementById('t2f');
+  const cv = t2el.value;
+  t2el.innerHTML = '<option value="all">All T2 leads</option>' +
+    t2s.map(k => `<option value="${k}"${cv===k?' selected':''}>${T2L[k]||k}</option>`).join('');
+  const dates = [...new Set(allData.map(r => r.date).filter(Boolean))].sort();
+  const del = document.getElementById('datef');
+  const dv = del.value;
+  del.innerHTML = '<option value="all">All dates</option>' +
+    dates.map(d => `<option value="${d}"${dv===d?' selected':''}>${d}</option>`).join('');
+}
+
+function getFiltered() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const t2 = document.getElementById('t2f').value;
+  const t3 = document.getElementById('t3f').value;
+  const dt = document.getElementById('datef').value;
+  return allData.filter(r =>
+    (!q || r.rm.replace(/\./g,' ').toLowerCase().includes(q)) &&
+    (t2 === 'all' || r.t2 === t2) &&
+    (t3 === 'all' || r.t3.startsWith(t3)) &&
+    (dt === 'all' || r.date === dt)
+  );
+}
+
+function avg(a) { return a.length ? a.reduce((s,v)=>s+v,0)/a.length : 0; }
+
+function fmtName(rm) {
+  return rm.replace(/\d+/g,'').split('.').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+
+function initials(rm) {
+  const p = rm.replace(/\d+/g,'').split('.').filter(Boolean);
+  return ((p[0]||'')[0]||'').toUpperCase() + ((p[1]||'')[0]||'').toUpperCase();
+}
+
+function setSort(k) {
+  sortKey = k;
+  document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+  document.getElementById('ps-' + k).classList.add('active');
+  render();
+}
+
+function barColor(pct) {
+  if (pct >= 0.67) return '#16A36A';
+  if (pct >= 0.40) return '#D97706';
+  return '#DC2626';
+}
+
+function render() {
+  const data = getFiltered();
+  const rmMap = {};
+  data.forEach(r => {
+    if (!r.rm) return;
+    if (!rmMap[r.rm]) rmMap[r.rm] = { rm: r.rm, t2: r.t2, t3: r.t3, n: 0, s: {} };
+    rmMap[r.rm].n++;
+    PARAMS.forEach(p => {
+      if (!rmMap[r.rm].s[p]) rmMap[r.rm].s[p] = [];
+      rmMap[r.rm].s[p].push(+r[p]||0);
+    });
+  });
+
+  let rms = Object.values(rmMap);
+
+  const getOverall = r => avg(PARAMS.flatMap(p => r.s[p]||[0]));
+
+  if (sortKey === 'total') rms.sort((a,b) => getOverall(b) - getOverall(a));
+  else if (sortKey === 'audits') rms.sort((a,b) => b.n - a.n);
+  else if (sortKey === 'name') rms.sort((a,b) => a.rm.localeCompare(b.rm));
+  else rms.sort((a,b) => avg(b.s[sortKey]||[0]) - avg(a.s[sortKey]||[0]));
+
+  const allOverall = rms.map(r => getOverall(r));
+  const grandAvg = avg(allOverall);
+  const totalAudits = rms.reduce((s,r)=>s+r.n, 0);
+  const topRM = rms[0];
+  const lowRM = rms[rms.length-1];
+
+  document.getElementById('kRMs').textContent = rms.length;
+  document.getElementById('kAudits').textContent = totalAudits;
+  document.getElementById('kAvg').textContent = grandAvg.toFixed(1) + ' / ' + MAX_SCORE;
+  document.getElementById('kTop').textContent = topRM ? fmtName(topRM.rm).split(' ')[0] + ' (' + getOverall(topRM).toFixed(1) + ')' : '—';
+  document.getElementById('kLow').textContent = lowRM && rms.length > 1 ? fmtName(lowRM.rm).split(' ')[0] + ' (' + getOverall(lowRM).toFixed(1) + ')' : '—';
+  document.getElementById('cardCount').textContent = rms.length + ' RMs';
+
+  if (!rms.length) {
+    document.getElementById('grid').innerHTML = '<div class="empty-state">No RMs match the current filters.</div>';
+    return;
+  }
+
+  document.getElementById('grid').innerHTML = rms.map((r, idx) => {
+    const paramAvgs = PARAMS.map(p => avg(r.s[p]||[0]));
+    const overall = avg(paramAvgs);
+    const pct = overall / MAX_SCORE;
+    const pct100 = pct * 100;
+    const ratingLabel = pct100 >= 67 ? 'Good' : pct100 >= 40 ? 'Average' : 'Needs work';
+    const ratingCls = pct100 >= 67 ? 'rating-good' : pct100 >= 40 ? 'rating-avg' : 'rating-low';
+    const pal = AVATAR_PALETTES[idx % AVATAR_PALETTES.length];
+    const t2name = T2L[r.t2] || r.t2 || '—';
+
+    const metricRows = PARAMS.map((p, i) => {
+      const a = paramAvgs[i];
+      const mp = a / MAX_SCORE;
+      const col = barColor(mp);
+      const barW = Math.round(mp * 100);
+      return `<div class="metric-row">
+        <span class="metric-name">${PLABELS[i]}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${barW}%;background:${col}"></div></div>
+        <span class="metric-score" style="color:${col}">${a.toFixed(1)}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="card">
+      <div class="card-head">
+        <div class="card-identity">
+          <div class="avatar" style="background:${pal.bg};color:${pal.tx}">${initials(r.rm)}</div>
+          <div>
+            <div class="card-name">${fmtName(r.rm)}</div>
+            <div class="card-meta">${t2name}</div>
+          </div>
+        </div>
+        <span class="rating-badge ${ratingCls}">${ratingLabel}</span>
+      </div>
+      <div class="audit-count-row">
+        <span class="audit-count-label">Audit count</span>
+        <span class="audit-count-val">${r.n} audit${r.n!==1?'s':''}</span>
+      </div>
+      <div class="score-summary">
+        <span class="score-left">Overall avg</span>
+        <div style="display:flex;align-items:baseline;gap:4px;">
+          <span class="score-big">${overall.toFixed(1)}</span>
+          <span class="score-denom">/ ${MAX_SCORE}</span>
+          <span class="score-pct">(${pct100.toFixed(0)}%)</span>
+        </div>
+      </div>
+      <div class="metrics">${metricRows}</div>
+    </div>`;
+  }).join('');
+}
+
+function scheduleRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  const s = parseInt(document.getElementById('intv').value);
+  if (s > 0) refreshTimer = setInterval(fetchAndRender, s * 1000);
+}
+
+fetchAndRender();
+scheduleRefresh();
+</script>
+</body>
+</html>
