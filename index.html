@@ -7,451 +7,165 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --bg: #0D0D0F;
-  --bg2: #141417;
-  --surface: #1A1A1F;
-  --surface2: #222228;
-  --surface3: #2A2A32;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #F0EFF4;
-  --text2: #9B9AA8;
-  --text3: #5C5B6A;
-  --green: #16C784;
-  --green-dim: rgba(22,199,132,0.12);
-  --amber: #F59E0B;
-  --amber-dim: rgba(245,158,11,0.12);
-  --red: #F03C3C;
-  --red-dim: rgba(240,60,60,0.12);
-  --blue: #5B8DEF;
-  --blue-dim: rgba(91,141,239,0.12);
-  --purple: #9D7FEA;
-  --purple-dim: rgba(157,127,234,0.12);
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-xs: 6px;
+:root{
+  --bg:#0D0D0F;--bg2:#141417;--surface:#1A1A1F;--surface2:#222228;--surface3:#2A2A32;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#F0EFF4;--text2:#9B9AA8;--text3:#5C5B6A;
+  --green:#16C784;--green-dim:rgba(22,199,132,0.12);
+  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.12);
+  --red:#F03C3C;--red-dim:rgba(240,60,60,0.12);
+  --blue:#5B8DEF;--blue-dim:rgba(91,141,239,0.12);
+  --purple:#9D7FEA;--purple-dim:rgba(157,127,234,0.12);
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
 }
-
 *{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;}
+::selection{background:rgba(157,127,234,0.3);}
+header{position:sticky;top:0;z-index:100;background:rgba(13,13,15,0.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Inter Tight',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.3px;color:var(--text);display:flex;align-items:center;gap:9px;}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.live-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);background:var(--surface);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(22,199,132,0.2);animation:breathe 2.5s ease-in-out infinite;}
+.live-dot.loading{background:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,0.2);}
+.live-dot.error{background:var(--red);box-shadow:none;animation:none;}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 3px rgba(22,199,132,0.2);}50%{box-shadow:0 0 0 6px rgba(22,199,132,0.0);}}
+#lastUpdate{font-size:11px;color:var(--text3);}
+.btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-xs);padding:6px 12px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;}
+.btn:hover{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,0.18);}
+.btn:active{transform:scale(0.97);}
+.spin{animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.main{max-width:1320px;margin:0 auto;padding:28px 28px 60px;}
+.page-title{font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.8px;color:var(--text);margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:24px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:24px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .2s,transform .2s;cursor:default;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0;opacity:0;transition:opacity .3s;}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px);}
+.kpi:hover::before{opacity:1;}
+.kpi-green::before{background:var(--green);}
+.kpi-blue::before{background:var(--blue);}
+.kpi-purple::before{background:var(--purple);}
+.kpi-amber::before{background:var(--amber);}
+.kpi-red::before{background:var(--red);}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.kpi-value{font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:700;letter-spacing:-0.8px;}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.controls select,.controls input{font-size:12px;font-family:'Inter',sans-serif;padding:7px 11px;border-radius:var(--radius-xs);border:1px solid var(--border2);background:var(--surface);color:var(--text2);outline:none;cursor:pointer;transition:border-color .15s,color .15s;appearance:none;-webkit-appearance:none;}
+.controls select:hover,.controls input:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+.controls select:focus,.controls input:focus{border-color:var(--purple);color:var(--text);box-shadow:0 0 0 3px rgba(157,127,234,0.15);}
+.controls input{width:190px;}
+.controls input::placeholder{color:var(--text3);}
+.sort-bar{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:22px;}
+.sort-label{font-size:11px;color:var(--text3);margin-right:3px;}
+.pill{font-size:11px;font-weight:500;padding:5px 11px;border-radius:99px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.pill:hover{background:var(--surface2);color:var(--text2);border-color:rgba(255,255,255,0.18);}
+.pill:active{transform:scale(0.95);}
+.pill.active{background:var(--purple-dim);color:var(--purple);border-color:rgba(157,127,234,0.4);}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Inter Tight',sans-serif;font-size:14px;font-weight:600;letter-spacing:-0.2px;color:var(--text2);}
+.count-badge{font-size:11px;color:var(--text3);background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:2px 9px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .25s,box-shadow .25s;position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--radius);opacity:0;transition:opacity .2s;pointer-events:none;background:radial-gradient(circle at 50% 0%,rgba(157,127,234,0.06),transparent 70%);}
+.card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+.card:hover::after{opacity:1;}
+.card:active{transform:translateY(-1px) scale(0.995);}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.card-id{display:flex;align-items:center;gap:11px;}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;transition:transform .2s;}
+.card:hover .avatar{transform:scale(1.06);}
+.card-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.25;}
+.card-meta{font-size:11px;color:var(--text3);margin-top:3px;}
+.card-actions{display:flex;gap:6px;align-items:center;}
+.rating{font-size:10px;font-weight:600;padding:3px 8px;border-radius:99px;letter-spacing:.03em;}
+.r-good{background:var(--green-dim);color:var(--green);}
+.r-avg{background:var(--amber-dim);color:var(--amber);}
+.r-low{background:var(--red-dim);color:var(--red);}
+.icon-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:14px;}
+.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,0.22);}
+.icon-btn:active{transform:scale(0.9);}
+.icon-btn.email-btn:hover{background:var(--blue-dim);color:var(--blue);border-color:rgba(91,141,239,0.35);}
+.audit-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.audit-label{font-size:11px;color:var(--text3);}
+.audit-pill{font-size:11px;font-weight:600;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:2px 9px;transition:all .15s;cursor:pointer;}
+.audit-pill:hover{border-color:var(--purple);color:var(--purple);}
+.audit-pill.expanded{background:var(--purple-dim);border-color:rgba(157,127,234,0.4);color:var(--purple);}
+.score-box{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:14px;transition:border-color .2s;}
+.card:hover .score-box{border-color:var(--border2);}
+.score-label{font-size:11px;color:var(--text3);}
+.score-big{font-family:'Inter Tight',sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.5px;color:var(--text);}
+.score-denom{font-size:12px;color:var(--text3);margin-left:2px;}
+.score-pct{font-size:11px;color:var(--text3);}
+.metrics{display:grid;gap:8px;}
+.metric-row{display:flex;align-items:center;gap:8px;opacity:0.85;transition:opacity .15s;}
+.card:hover .metric-row{opacity:1;}
+.metric-name{font-size:11px;color:var(--text3);width:90px;flex-shrink:0;white-space:nowrap;}
+.bar-track{flex:1;height:4px;background:var(--surface3);border-radius:99px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.16,1,.3,1);}
+.metric-val{font-size:11px;font-weight:600;width:28px;text-align:right;flex-shrink:0;}
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+/* Audit dates panel */
+.dates-panel{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;display:none;animation:slideDown .2s ease;}
+.dates-panel.open{display:block;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.dates-title{font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.date-group{margin-bottom:10px;}
+.date-group-header{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.date-chip{font-size:10px;color:var(--text3);background:var(--surface3);border-radius:4px;padding:1px 5px;}
+.lead-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:6px;background:var(--surface2);margin-bottom:3px;border:1px solid var(--border);}
+.lead-row:last-child{margin-bottom:0;}
+.lead-score{display:flex;gap:4px;}
+.score-chip{font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;white-space:nowrap;}
+.sc-good{background:var(--green-dim);color:var(--green);}
+.sc-avg{background:var(--amber-dim);color:var(--amber);}
+.sc-low{background:var(--red-dim);color:var(--red);}
+.lead-total{font-size:11px;font-weight:600;color:var(--text2);}
 
-::selection { background: rgba(157,127,234,0.3); }
-
-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(13,13,15,0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 28px;
-  height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  font-family: 'Inter Tight', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: -0.3px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 9px;
-}
-
-.logo-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--purple), var(--blue));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.live-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text2);
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 99px;
-  padding: 4px 12px;
-}
-
-.live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 0 3px rgba(22,199,132,0.2);
-  animation: breathe 2.5s ease-in-out infinite;
-}
-
-.live-dot.loading { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
-.live-dot.error { background: var(--red); box-shadow: none; animation: none; }
-
-@keyframes breathe {
-  0%,100% { box-shadow: 0 0 0 3px rgba(22,199,132,0.2); }
-  50% { box-shadow: 0 0 0 6px rgba(22,199,132,0.0); }
-}
-
-#lastUpdate { font-size: 11px; color: var(--text3); }
-
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text2);
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-xs);
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: all .15s;
-  font-family: 'Inter', sans-serif;
-}
-
-.btn:hover { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.18); }
-.btn:active { transform: scale(0.97); }
-
-.spin { animation: spin 0.8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.main {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 28px 28px 60px;
-}
-
-.page-header { margin-bottom: 24px; }
-
-.page-title {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.page-sub { font-size: 13px; color: var(--text3); }
-
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.kpi {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  transition: border-color .2s, transform .2s;
-  cursor: default;
-  position: relative;
-  overflow: hidden;
-}
-
-.kpi::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
-  opacity: 0;
-  transition: opacity .3s;
-}
-
-.kpi:hover { border-color: var(--border2); transform: translateY(-2px); }
-.kpi:hover::before { opacity: 1; }
-.kpi-green::before { background: var(--green); }
-.kpi-blue::before { background: var(--blue); }
-.kpi-purple::before { background: var(--purple); }
-.kpi-amber::before { background: var(--amber); }
-.kpi-red::before { background: var(--red); }
-
-.kpi-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
-.kpi-value { font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); }
-.kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-
-.controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.controls select, .controls input {
-  font-size: 12px;
-  font-family: 'Inter', sans-serif;
-  padding: 7px 11px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border2);
-  background: var(--surface);
-  color: var(--text2);
-  outline: none;
-  cursor: pointer;
-  transition: border-color .15s, color .15s;
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-.controls select:hover, .controls input:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-.controls select:focus, .controls input:focus { border-color: var(--purple); color: var(--text); box-shadow: 0 0 0 3px rgba(157,127,234,0.15); }
-.controls input { width: 190px; }
-.controls input::placeholder { color: var(--text3); }
-
-.sort-bar {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 22px;
-}
-
-.sort-label { font-size: 11px; color: var(--text3); margin-right: 3px; }
-
-.pill {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 5px 11px;
-  border-radius: 99px;
-  border: 1px solid var(--border2);
-  background: transparent;
-  color: var(--text3);
-  cursor: pointer;
-  font-family: 'Inter', sans-serif;
-  transition: all .15s;
-}
-
-.pill:hover { background: var(--surface2); color: var(--text2); border-color: rgba(255,255,255,0.18); }
-.pill:active { transform: scale(0.95); }
-.pill.active { background: var(--purple-dim); color: var(--purple); border-color: rgba(157,127,234,0.4); }
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.section-title {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-  color: var(--text2);
-}
-
-.count-badge {
-  font-size: 11px;
-  color: var(--text3);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  padding: 2px 9px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-  gap: 12px;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  transition: border-color .2s, transform .25s, box-shadow .25s;
-  cursor: default;
-  position: relative;
-  overflow: hidden;
-}
-
-.card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--radius);
-  opacity: 0;
-  transition: opacity .2s;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 0%, rgba(157,127,234,0.06), transparent 70%);
-}
-
-.card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-.card:hover::after { opacity: 1; }
-.card:active { transform: translateY(-1px) scale(0.995); }
-
-.card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
-.card-id { display: flex; align-items: center; gap: 11px; }
-
-.avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  flex-shrink: 0;
-  transition: transform .2s;
-}
-
-.card:hover .avatar { transform: scale(1.06); }
-
-.card-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.25; }
-.card-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
-
-.rating {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 99px;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
-}
-.r-good { background: var(--green-dim); color: var(--green); }
-.r-avg { background: var(--amber-dim); color: var(--amber); }
-.r-low { background: var(--red-dim); color: var(--red); }
-
-.audit-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.audit-label { font-size: 11px; color: var(--text3); }
-
-.audit-pill {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text2);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  padding: 2px 9px;
-  transition: all .15s;
-}
-
-.card:hover .audit-pill { border-color: var(--border2); color: var(--text); }
-
-.score-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 11px 14px;
-  margin-bottom: 14px;
-  transition: border-color .2s;
-}
-
-.card:hover .score-box { border-color: var(--border2); }
-.score-label { font-size: 11px; color: var(--text3); }
-.score-big { font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
-.score-denom { font-size: 12px; color: var(--text3); margin-left: 2px; }
-.score-pct { font-size: 11px; color: var(--text3); }
-
-.metrics { display: grid; gap: 8px; }
-
-.metric-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: opacity .15s;
-}
-
-.card:hover .metric-row { opacity: 1; }
-.metric-row { opacity: 0.85; }
-
-.metric-name { font-size: 11px; color: var(--text3); width: 90px; flex-shrink: 0; white-space: nowrap; }
-
-.bar-track {
-  flex: 1;
-  height: 4px;
-  background: var(--surface3);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width .6s cubic-bezier(.16,1,.3,1);
-}
-
-.metric-val { font-size: 11px; font-weight: 600; width: 28px; text-align: right; flex-shrink: 0; }
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 80px 20px;
-  color: var(--text3);
-  font-size: 14px;
-}
-
-footer {
-  text-align: center;
-  font-size: 11px;
-  color: var(--text3);
-  border-top: 1px solid var(--border);
-  padding: 18px;
-  letter-spacing: 0.02em;
-}
-
-.fade-in { animation: fadeIn .35s ease forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.stagger-1 { animation-delay: .05s; opacity: 0; }
-.stagger-2 { animation-delay: .10s; opacity: 0; }
-.stagger-3 { animation-delay: .15s; opacity: 0; }
-.stagger-4 { animation-delay: .20s; opacity: 0; }
-
-@media (max-width: 640px) {
-  header { padding: 0 16px; }
-  .main { padding: 16px 16px 50px; }
-  .grid { grid-template-columns: 1fr; }
-  .controls input { width: 100%; }
-  .page-title { font-size: 20px; }
-}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto;backdrop-filter:blur(4px);animation:fadeOverlay .2s ease;}
+@keyframes fadeOverlay{from{opacity:0;}to{opacity:1;}}
+.modal{background:#0F1117;border:1px solid var(--border2);border-radius:18px;width:100%;max-width:680px;margin:auto;animation:slideUp .25s cubic-bezier(.16,1,.3,1);}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.modal-actions{display:flex;gap:8px;align-items:center;}
+.modal-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;}
+.modal-close:hover{background:var(--surface2);color:var(--text);}
+.email-preview{padding:0 22px 22px;}
+.email-meta{padding:14px 0;border-bottom:1px solid var(--border);display:grid;gap:6px;}
+.email-meta-row{display:flex;gap:8px;font-size:12px;}
+.email-meta-label{color:var(--text3);width:32px;flex-shrink:0;}
+.email-meta-val{color:var(--text2);}
+.email-body{margin-top:16px;font-size:13px;line-height:1.7;color:var(--text2);}
+.email-body h3{font-family:'Inter Tight',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin:16px 0 6px;}
+.email-body h4{font-size:12px;font-weight:600;color:var(--text2);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.06em;}
+.email-body p{margin-bottom:10px;}
+.email-score-table{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:12px;}
+.email-score-table th{text-align:left;padding:6px 8px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border2);}
+.email-score-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.email-score-table tr:last-child td{border-bottom:none;}
+.improvement-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0;}
+.improvement-block h4{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:6px;}
+.pitch-block{background:rgba(91,141,239,0.08);border:1px solid rgba(91,141,239,0.2);border-left:3px solid var(--blue);border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;font-style:italic;color:var(--text2);}
+.action-block{background:rgba(22,199,132,0.06);border:1px solid rgba(22,199,132,0.2);border-radius:10px;padding:12px 14px;margin:10px 0;}
+.action-block h4{font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;}
+.send-btn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;border-radius:9px;padding:10px 20px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;margin-top:4px;}
+.send-btn:hover{opacity:0.88;transform:scale(1.02);}
+.send-btn:active{transform:scale(0.97);}
+.cancel-btn{font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:1px solid var(--border2);border-radius:9px;padding:10px 16px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.cancel-btn:hover{background:var(--surface2);color:var(--text2);}
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text3);font-size:14px;}
+.fade-in{animation:fadeIn .35s ease forwards;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.stagger-1{animation-delay:.05s;opacity:0;}
+.stagger-2{animation-delay:.10s;opacity:0;}
+.stagger-3{animation-delay:.15s;opacity:0;}
+.stagger-4{animation-delay:.20s;opacity:0;}
+footer{text-align:center;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding:18px;letter-spacing:.02em;}
+@media(max-width:640px){header{padding:0 16px;}.main{padding:16px 16px 50px;}.grid{grid-template-columns:1fr;}.controls input{width:100%;}.page-title{font-size:20px;}}
 </style>
 </head>
 <body>
@@ -468,21 +182,19 @@ footer {
       <span id="liveText">Loading…</span>
     </div>
     <button class="btn" onclick="fetchAndRender()" aria-label="Refresh data">
-      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-      </svg>
+      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       Refresh
     </button>
   </div>
 </header>
 
 <main class="main">
-  <div class="page-header fade-in">
+  <div class="fade-in">
     <div class="page-title">3 Mins+ Call Audits</div>
     <div class="page-sub">Individual RM scorecards — audit count & average per metric</div>
   </div>
 
-  <div class="kpi-grid" id="kpiGrid">
+  <div class="kpi-grid">
     <div class="kpi kpi-purple fade-in stagger-1"><div class="kpi-label">Total RMs</div><div class="kpi-value" id="kRMs">—</div></div>
     <div class="kpi kpi-blue fade-in stagger-2"><div class="kpi-label">Total audits</div><div class="kpi-value" id="kAudits">—</div></div>
     <div class="kpi kpi-green fade-in stagger-3"><div class="kpi-label">Grand avg score</div><div class="kpi-value" id="kAvg">—</div></div>
@@ -492,14 +204,10 @@ footer {
 
   <div class="controls fade-in">
     <input type="text" id="search" placeholder="Search RM name…" oninput="render()" aria-label="Search RM">
-    <select id="t3f" onchange="render()" aria-label="Filter by T3 manager">
-      <option value="all">All T3 managers</option>
-      <option value="k.bhat">k.bhat</option>
-      <option value="rohit.raj">rohit.raj</option>
-    </select>
-    <select id="t2f" onchange="render()" aria-label="Filter by T2 lead"><option value="all">All T2 leads</option></select>
-    <select id="datef" onchange="render()" aria-label="Filter by date"><option value="all">All dates</option></select>
-    <select id="intv" onchange="scheduleRefresh()" style="margin-left:auto;" aria-label="Auto-refresh interval">
+    <select id="t3f" onchange="render()" aria-label="T3 manager"><option value="all">All T3 managers</option><option value="k.bhat">k.bhat</option><option value="rohit.raj">rohit.raj</option></select>
+    <select id="t2f" onchange="render()" aria-label="T2 lead"><option value="all">All T2 leads</option></select>
+    <select id="datef" onchange="render()" aria-label="Date filter"><option value="all">All dates</option></select>
+    <select id="intv" onchange="scheduleRefresh()" style="margin-left:auto;" aria-label="Refresh interval">
       <option value="60">Refresh: 1 min</option>
       <option value="300">Refresh: 5 min</option>
       <option value="0">Manual only</option>
@@ -527,25 +235,44 @@ footer {
   </div>
 </main>
 
-<footer>
-  Call Audit Dashboard · Data from Google Sheets · Auto-refreshes every minute
-</footer>
+<footer>Call Audit Dashboard · Square Yards · Data from Google Sheets · Auto-refreshes every minute</footer>
+
+<div id="emailModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Draft feedback email</span>
+        <div class="modal-actions">
+          <button class="send-btn" onclick="openMailto()" aria-label="Open in mail client">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Open in Mail
+          </button>
+          <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+          <button class="modal-close" onclick="closeModal()" aria-label="Close modal">✕</button>
+        </div>
+      </div>
+      <div class="email-preview">
+        <div class="email-meta" id="emailMeta"></div>
+        <div class="email-body" id="emailBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const SHEET_ID = '1hKupVCRggdSF-zFcsJljRT8Qm3BuWEpAMtQ6cv9ZZ54';
-const GID = '1496052796';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+const SHEET_ID='1hKupVCRggdSF-zFcsJljRT8Qm3BuWEpAMtQ6cv9ZZ54';
+const GID='1496052796';
+const CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+const CC_ME='rohit.bhandage@squareyards.in';
+const DOMAIN='squareyards.in';
 
-const PARAMS = ['intro','micro','loc','prod','rapport','obj','sv'];
-const PLABELS = ['Introduction','Micro-market','Location','Product','Rapport','Objection hdl','Push SV'];
-const MAX = 3;
+const PARAMS=['intro','micro','loc','prod','rapport','obj','sv'];
+const PLABELS=['Introduction','Micro-market','Location','Product','Rapport','Objection Handling','Push SV'];
+const MAX=3;
 
-const T2L = {
-  'kopal.jain':'Kopal Jain','jagadeesh.k':'Jagadeesh K','vishal.nayak':'Vishal Nayak',
-  'kiran.m6':'Kiran M','siddharth.panwar':'Siddharth P','mohammed.khan2':'Mohd Khan','mohammed.nawaz':'Mohd Nawaz'
-};
+const T2L={'kopal.jain':'Kopal Jain','jagadeesh.k':'Jagadeesh K','vishal.nayak':'Vishal Nayak','kiran.m6':'Kiran M','siddharth.panwar':'Siddharth P','mohammed.khan2':'Mohd Khan','mohammed.nawaz':'Mohd Nawaz'};
 
-const PALETTES = [
+const PALETTES=[
   {bg:'rgba(91,141,239,0.15)',tx:'#5B8DEF'},
   {bg:'rgba(22,199,132,0.15)',tx:'#16C784'},
   {bg:'rgba(157,127,234,0.15)',tx:'#9D7FEA'},
@@ -556,43 +283,52 @@ const PALETTES = [
   {bg:'rgba(163,230,53,0.15)',tx:'#A3E635'},
 ];
 
-let allData=[], sortKey='total', refreshTimer=null;
+const PITCHES={
+  intro:`"Hi, this is [Your Name] calling from Square Yards. I was reaching out because we have some exciting residential options in [Location] that many of our clients in similar profiles have been really drawn to. Do you have about 2 minutes? I just wanted to understand your current housing situation and see if what we have could be a good fit for you."`,
+  micro:`"The reason I'm calling specifically about [Project/Location] is that it sits right next to [Landmark/Metro/Highway], so commute is sorted. The area has seen about 12-15% appreciation in the last 2 years, which is above average for this micro-market. Most of our buyers here are [profile e.g. young families / IT professionals] — does that match your profile?"`,
+  loc:`"[Location] is becoming one of the fastest-growing corridors in [City]. It has upcoming infrastructure like [metro line/ring road/school/hospital] within 2 km. The price points here are still in the sweet spot before the infrastructure projects complete and values jump. Have you explored this zone before?"`,
+  prod:`"The project I'm calling about is [Project Name] by [Developer]. It's a [config] unit, [X] sq ft, priced at [X]. What makes it stand out is [USP — e.g. low maintenance society, modular kitchen, clubhouse, RERA registered]. EMI works out to roughly ₹[X]/month on 80% funding. Would you prefer 2BHK or 3BHK?"`,
+  rapport:`"I completely understand — buying property is one of the biggest decisions we make. That's exactly why I never push anything. My job is to give you the clearest picture possible so you can make the right call. Tell me — what's the one thing that would make this the perfect time to invest for you?"`,
+  obj:`"That's a very valid concern and I hear it a lot. [Objection]. What I've seen with clients who felt the same way is that [resolution]. At the end of the day, if numbers don't work out, I'd rather tell you that upfront. Can I share a quick comparison so we have something concrete to look at?"`,
+  sv:`"Based on what you've shared, I'd love to take you for a site visit this weekend — it takes about an hour and you'll get a much clearer feel for the unit and location than anything I can describe over the phone. I can arrange a cab pickup too. Would Saturday or Sunday work better for you?"`
+};
 
-function setStatus(state, msg) {
-  const dot = document.getElementById('liveDot');
-  const txt = document.getElementById('liveText');
-  dot.className = 'live-dot' + (state==='ok' ? '' : state==='loading' ? ' loading' : ' error');
-  txt.textContent = msg;
+const PARAM_ADVICE={
+  intro:'Your introduction is the first 10 seconds of the call — the prospect decides whether to listen or hang up right here. Use your name, company, and a one-line hook that creates curiosity. Never start with "Am I speaking to...?"',
+  micro:'Micro-market knowledge builds credibility instantly. Know the nearest landmark, upcoming infrastructure, appreciation trend, and the buyer profile of that zone. Prospects feel safe buying from someone who knows the locality.',
+  loc:'Location explanation should paint a picture — proximity to work hubs, schools, hospitals, metro. Tie it to the prospect\'s lifestyle. "You mentioned you work in Whitefield — this is literally 8 minutes on the new flyover."',
+  prod:'Product knowledge is your ammunition. Know the configuration, price per sq ft, EMI, developer track record, RERA number, and at least 3 genuine USPs. A confident product pitch converts curiosity into appointments.',
+  rapport:'Rapport is not small talk — it is active listening. Mirror their language, acknowledge their concern, and make them feel heard before you pitch. The sale happens when trust is established.',
+  obj:'Objection handling separates good RMs from great ones. Do not argue. Acknowledge, reframe, and present evidence. Common objections: "market is down", "not the right time", "let me check with family" — have a crisp, honest answer for each.',
+  sv:'The SV ask is the most important close on a cold call. Every call should end with a site visit attempt. If they say no, find out the blocker and address it. An SV booked is a deal in progress.'
+};
+
+let allData=[],sortKey='total',refreshTimer=null,currentModalData=null;
+
+function setStatus(s,m){
+  document.getElementById('liveDot').className='live-dot'+(s==='ok'?'':s==='loading'?' loading':' error');
+  document.getElementById('liveText').textContent=m;
 }
 
-function parseCSVLine(line) {
-  const res=[]; let cur='', inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){inQ=!inQ;}
-    else if(c===','&&!inQ){res.push(cur.trim());cur='';}
-    else{cur+=c;}
-  }
-  res.push(cur.trim()); return res;
+function parseCSVLine(line){
+  const res=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){res.push(cur.trim());cur='';}else{cur+=c;}}
+  res.push(cur.trim());return res;
 }
 
-function parseCSV(text) {
-  const lines=text.trim().split('\n'), rows=[];
-  let hi=-1, headers=[];
+function parseCSV(text){
+  const lines=text.trim().split('\n'),rows=[];
+  let hi=-1,headers=[];
   for(let i=0;i<lines.length;i++){
-    const cells=parseCSVLine(lines[i]);
-    const lo=cells.map(c=>c.toLowerCase().trim());
-    if(lo.includes('date')&&lo.includes('rm name')&&lo.includes('introduction')){
-      hi=i; headers=lo; continue;
-    }
+    const cells=parseCSVLine(lines[i]),lo=cells.map(c=>c.toLowerCase().trim());
+    if(lo.includes('date')&&lo.includes('rm name')&&lo.includes('introduction')){hi=i;headers=lo;continue;}
     if(hi===-1||cells.length<8) continue;
     const get=col=>{const idx=headers.indexOf(col);return idx>=0?(cells[idx]||'').trim():'';};
     const toN=v=>{const n=parseInt(v);return isNaN(n)?0:Math.max(0,Math.min(3,n));};
     const date=get('date');
     if(!date||!/\d{2}-[a-z]{3}/i.test(date)) continue;
     const rm=get('rm name').split('@')[0];
-    const t2=get('t2').split('@')[0];
-    const t3=get('t3').split('@')[0];
+    const t2=get('t2').split('@')[0],t3=get('t3').split('@')[0];
     const intro=toN(get('introduction'));
     const micro=toN(get('micro-market')||get('micro_market')||get('micro market'));
     const loc=toN(get('location explanation')||get('location_explanation'));
@@ -606,7 +342,7 @@ function parseCSV(text) {
   return rows;
 }
 
-async function fetchAndRender() {
+async function fetchAndRender(){
   setStatus('loading','Fetching…');
   const ico=document.getElementById('refreshIcon');
   ico.classList.add('spin');
@@ -620,7 +356,7 @@ async function fetchAndRender() {
     const t=new Date();
     document.getElementById('lastUpdate').textContent='Updated '+t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     setStatus('ok','Live · '+parsed.length+' records');
-    populateFilters(); render();
+    populateFilters();render();
   }catch(e){
     if(allData.length){setStatus('error','Stale — using cache');render();}
     else loadFallback();
@@ -644,19 +380,14 @@ function loadFallback(){
     {date:'17-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'pooja.singh4',intro:1,micro:2,loc:1,prod:2,rapport:2,obj:0,sv:0},
     {date:'17-Jun',t2:'vishal.nayak',t3:'k.bhat',rm:'naveen.c60',intro:3,micro:2,loc:2,prod:3,rapport:2,obj:2,sv:0},
     {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'vedant.mehar',intro:1,micro:1,loc:2,prod:1,rapport:2,obj:1,sv:2},
-    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'akhil.raj',intro:1,micro:1,loc:1,prod:1,rapport:2,obj:1,sv:1},
     {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'akhil.raj',intro:1,micro:1,loc:2,prod:1,rapport:1,obj:1,sv:2},
-    {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'bestin.sebastian',intro:1,micro:0,loc:2,prod:1,rapport:0,obj:0,sv:0},
     {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'bestin.sebastian',intro:2,micro:0,loc:1,prod:1,rapport:1,obj:1,sv:2},
     {date:'17-Jun',t2:'kiran.m6',t3:'rohit.raj',rm:'dibya.mohapatra',intro:0,micro:0,loc:1,prod:1,rapport:1,obj:0,sv:1},
     {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'ravikar.kumar23',intro:1,micro:1,loc:1,prod:1,rapport:2,obj:1,sv:1},
-    {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'chetan.patil1',intro:1,micro:2,loc:1,prod:1,rapport:2,obj:1,sv:2},
     {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'chetan.patil1',intro:2,micro:2,loc:2,prod:2,rapport:2,obj:2,sv:3},
     {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'swarnali.karmakar',intro:1,micro:0,loc:1,prod:1,rapport:1,obj:0,sv:1},
     {date:'17-Jun',t2:'siddharth.panwar',t3:'rohit.raj',rm:'gopu.krishnan',intro:2,micro:1,loc:0,prod:1,rapport:1,obj:1,sv:0},
     {date:'17-Jun',t2:'mohammed.khan2',t3:'rohit.raj',rm:'sachin.bangera',intro:1,micro:2,loc:1,prod:1,rapport:2,obj:0,sv:0},
-    {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:2,micro:1,loc:2,prod:1,rapport:1,obj:1,sv:0},
-    {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:2,micro:2,loc:2,prod:2,rapport:3,obj:2,sv:3},
     {date:'17-Jun',t2:'mohammed.nawaz',t3:'rohit.raj',rm:'s.hafeez',intro:3,micro:2,loc:2,prod:2,rapport:3,obj:3,sv:2},
     {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'payal.verma',intro:2,micro:1,loc:2,prod:1,rapport:2,obj:2,sv:1},
     {date:'18-Jun',t2:'jagadeesh.k',t3:'k.bhat',rm:'vanguri.ezra',intro:1,micro:2,loc:2,prod:2,rapport:3,obj:3,sv:3},
@@ -677,48 +408,31 @@ function loadFallback(){
     {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'lakshmi.sajeevan',intro:1,micro:0,loc:1,prod:0,rapport:0,obj:0,sv:0},
     {date:'18-Jun',t2:'kopal.jain',t3:'k.bhat',rm:'paramita.datta',intro:1,micro:0,loc:0,prod:0,rapport:0,obj:1,sv:0},
   ];
-  setStatus('error','Sheet not public — cached data');
-  populateFilters(); render();
+  setStatus('error','Sheet not public — using cached data');
+  populateFilters();render();
 }
 
 function populateFilters(){
   const t2s=[...new Set(allData.map(r=>r.t2).filter(Boolean))].sort();
-  const t2el=document.getElementById('t2f'), cv=t2el.value;
+  const t2el=document.getElementById('t2f'),cv=t2el.value;
   t2el.innerHTML='<option value="all">All T2 leads</option>'+t2s.map(k=>`<option value="${k}"${cv===k?' selected':''}>${T2L[k]||k}</option>`).join('');
   const dates=[...new Set(allData.map(r=>r.date).filter(Boolean))].sort();
-  const del=document.getElementById('datef'), dv=del.value;
+  const del=document.getElementById('datef'),dv=del.value;
   del.innerHTML='<option value="all">All dates</option>'+dates.map(d=>`<option value="${d}"${dv===d?' selected':''}>${d}</option>`).join('');
 }
 
 function getFiltered(){
   const q=document.getElementById('search').value.toLowerCase();
-  const t2=document.getElementById('t2f').value;
-  const t3=document.getElementById('t3f').value;
-  const dt=document.getElementById('datef').value;
-  return allData.filter(r=>
-    (!q||r.rm.replace(/\./g,' ').toLowerCase().includes(q))&&
-    (t2==='all'||r.t2===t2)&&
-    (t3==='all'||r.t3.startsWith(t3))&&
-    (dt==='all'||r.date===dt)
-  );
+  const t2=document.getElementById('t2f').value,t3=document.getElementById('t3f').value,dt=document.getElementById('datef').value;
+  return allData.filter(r=>(!q||r.rm.replace(/\./g,' ').toLowerCase().includes(q))&&(t2==='all'||r.t2===t2)&&(t3==='all'||r.t3.startsWith(t3))&&(dt==='all'||r.date===dt));
 }
 
 function avg(a){return a.length?a.reduce((s,v)=>s+v,0)/a.length:0;}
 
-function fmtName(rm){
-  return rm.replace(/\d+/g,'').split('.').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
-}
-
-function initials(rm){
-  const p=rm.replace(/\d+/g,'').split('.').filter(Boolean);
-  return ((p[0]||'')[0]||'').toUpperCase()+((p[1]||'')[0]||'').toUpperCase();
-}
-
-function barColor(pct){
-  if(pct>=0.67) return '#16C784';
-  if(pct>=0.40) return '#F59E0B';
-  return '#F03C3C';
-}
+function fmtName(rm){return rm.replace(/\d+/g,'').split('.').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');}
+function initials(rm){const p=rm.replace(/\d+/g,'').split('.').filter(Boolean);return((p[0]||'')[0]||'').toUpperCase()+((p[1]||'')[0]||'').toUpperCase();}
+function barColor(pct){if(pct>=0.67)return'#16C784';if(pct>=0.40)return'#F59E0B';return'#F03C3C';}
+function scoreClass(v){if(v>=2)return'sc-good';if(v>=1)return'sc-avg';return'sc-low';}
 
 function setSort(k){
   sortKey=k;
@@ -727,13 +441,176 @@ function setSort(k){
   render();
 }
 
+function toggleAudits(rmKey){
+  const panel=document.getElementById('dp-'+rmKey);
+  const pill=document.getElementById('ap-'+rmKey);
+  if(!panel) return;
+  const isOpen=panel.classList.contains('open');
+  panel.classList.toggle('open',!isOpen);
+  if(pill) pill.classList.toggle('expanded',!isOpen);
+}
+
+function rmEmail(rm){return rm.toLowerCase().replace(/\d+/g,'').replace(/\./g,'.')+'@'+DOMAIN;}
+
+function openEmail(rmKey,rmData){
+  currentModalData={rmKey,rmData};
+  buildEmailModal(rmKey,rmData);
+  document.getElementById('emailModal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.querySelector('.modal-overlay')) return;
+  document.getElementById('emailModal').style.display='none';
+  document.body.style.overflow='';
+}
+
+function buildEmailModal(rmKey,rmData){
+  const name=fmtName(rmKey);
+  const toEmail=rmEmail(rmKey);
+  const t2name=T2L[rmData.t2]||rmData.t2||'';
+  const t3name=rmData.t3||'';
+  const t2email=rmData.t2?rmData.t2+'@'+DOMAIN:'';
+  const t3email=rmData.t3?rmData.t3+'@'+DOMAIN:'';
+  const ccList=[t2email,t3email,CC_ME].filter(Boolean).join(', ');
+
+  const paramAvgs=PARAMS.map(p=>avg(rmData.s[p]||[0]));
+  const overall=avg(paramAvgs);
+  const pct=(overall/MAX*100).toFixed(0);
+
+  const weak=PARAMS.map((p,i)=>({p,i,a:paramAvgs[i]})).filter(x=>x.a<1.5).sort((a,b)=>a.a-b.a);
+  const strong=PARAMS.map((p,i)=>({p,i,a:paramAvgs[i]})).filter(x=>x.a>=2).sort((a,b)=>b.a-a.a);
+
+  const dateGroups={};
+  (rmData.audits||[]).forEach(r=>{
+    if(!dateGroups[r.date]) dateGroups[r.date]=[];
+    dateGroups[r.date].push(r);
+  });
+
+  document.getElementById('modalTitle').textContent=`Feedback email — ${name}`;
+
+  document.getElementById('emailMeta').innerHTML=`
+    <div class="email-meta-row"><span class="email-meta-label">To</span><span class="email-meta-val">${name} &lt;${toEmail}&gt;</span></div>
+    <div class="email-meta-row"><span class="email-meta-label">CC</span><span class="email-meta-val">${ccList}</span></div>
+    <div class="email-meta-row"><span class="email-meta-label" style="width:48px;">Subject</span><span class="email-meta-val" style="font-weight:500;color:var(--text);">Your Call Audit Feedback — Week of ${Object.keys(dateGroups).join(' & ')} | Square Yards</span></div>
+  `;
+
+  const auditRows=Object.entries(dateGroups).map(([date,rows])=>`
+    <tr><td colspan="9" style="padding:8px;background:rgba(255,255,255,0.03);font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;">${date}</td></tr>
+    ${rows.map((r,idx)=>{
+      const tot=PARAMS.reduce((s,p)=>s+(+r[p]||0),0);
+      return`<tr>
+        <td style="color:var(--text2);">Call ${idx+1}</td>
+        ${PARAMS.map(p=>`<td style="text-align:center;"><span class="score-chip ${scoreClass(+r[p]||0)}">${r[p]}</span></td>`).join('')}
+        <td style="text-align:center;font-weight:600;color:var(--text);">${tot}/${MAX*PARAMS.length}</td>
+      </tr>`;
+    }).join('')}
+  `).join('');
+
+  const improvementBlocks=weak.map(({p,i,a})=>`
+    <div class="improvement-block">
+      <h4>⚡ ${PLABELS[i]} — Avg: ${a.toFixed(1)} / ${MAX}</h4>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">${PARAM_ADVICE[p]}</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Sample pitch to practice this week:</p>
+      <div class="pitch-block">${PITCHES[p]}</div>
+    </div>
+  `).join('');
+
+  const strongText=strong.length>0?`<p>Your strongest areas this week were <strong>${strong.map(x=>PLABELS[x.i]).join(', ')}</strong> — keep this momentum going.</p>`:'';
+
+  document.getElementById('emailBody').innerHTML=`
+    <p>Hi ${name.split(' ')[0]},</p>
+    <p>Hope you're doing well! Here is your personalised call audit feedback for the week. This is based on your ${rmData.n} audited call${rmData.n!==1?'s':''} with an overall average score of <strong>${overall.toFixed(1)} / ${MAX}</strong> (${pct}%).</p>
+    <p>The goal of this feedback is not to evaluate you — it is to help you close more site visits and conversions. Please read through carefully and take 20 minutes to work on the pitches below.</p>
+
+    <h3>📊 Your audit scorecard</h3>
+    <table class="email-score-table">
+      <thead><tr>
+        <th>Call</th>
+        ${PLABELS.map(l=>`<th style="text-align:center;">${l}</th>`).join('')}
+        <th style="text-align:center;">Total</th>
+      </tr></thead>
+      <tbody>${auditRows}</tbody>
+    </table>
+
+    <h3>📈 Parameter averages</h3>
+    ${PARAMS.map((p,i)=>{
+      const a=paramAvgs[i];const pct2=Math.round(a/MAX*100);
+      const col=a>=2?'#16C784':a>=1?'#F59E0B':'#F03C3C';
+      return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--text3);width:130px;">${PLABELS[i]}</span>
+        <div style="flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;"><div style="width:${pct2}%;height:100%;background:${col};border-radius:3px;"></div></div>
+        <span style="font-size:11px;font-weight:600;color:${col};width:32px;text-align:right;">${a.toFixed(1)}</span>
+      </div>`;
+    }).join('')}
+
+    ${weak.length>0?`<h3>🎯 Areas to focus on this week</h3>${improvementBlocks}`:'<p style="color:var(--green)">Outstanding performance across all parameters this week!</p>'}
+
+    ${strongText}
+
+    <div class="action-block">
+      <h4>✅ Your action for this week</h4>
+      <p style="font-size:12px;color:var(--text2);">Please reply to this email with your <strong>reworked pitch</strong> for your weakest area${weak.length>1?'s':''}. Write it in your own words — something you'd actually say on a call. Your ${t2name?t2name+' and manager':'manager'} will review it and share feedback.</p>
+      <p style="font-size:12px;color:var(--text2);margin-top:6px;">This is a growth exercise, not a test. The associates who work on their pitches between calls are the ones who hit their SVs fastest.</p>
+    </div>
+
+    <p style="margin-top:14px;">If you have any questions about the scores or want to do a mock call practice session, reach out to your TL directly.</p>
+    <p>Keep at it — you're closer to your targets than you think.</p>
+    <p style="margin-top:12px;color:var(--text3);font-size:12px;">Warm regards,<br><strong style="color:var(--text2);">Rohit Bhandage</strong><br>Square Yards | Quality & Training</p>
+  `;
+}
+
+function openMailto(){
+  if(!currentModalData) return;
+  const {rmKey,rmData}=currentModalData;
+  const name=fmtName(rmKey);
+  const toEmail=rmEmail(rmKey);
+  const t2email=rmData.t2?rmData.t2+'@'+DOMAIN:'';
+  const t3email=rmData.t3?rmData.t3+'@'+DOMAIN:'';
+  const ccList=[t2email,t3email,CC_ME].filter(Boolean).join(',');
+
+  const paramAvgs=PARAMS.map(p=>avg(rmData.s[p]||[0]));
+  const overall=avg(paramAvgs);
+  const pct=(overall/MAX*100).toFixed(0);
+  const weak=PARAMS.map((p,i)=>({p,i,a:paramAvgs[i]})).filter(x=>x.a<1.5).sort((a,b)=>a.a-b.a);
+
+  const dateGroups={};
+  (rmData.audits||[]).forEach(r=>{if(!dateGroups[r.date]) dateGroups[r.date]=[];dateGroups[r.date].push(r);});
+
+  let body=`Hi ${name.split(' ')[0]},\n\nHope you are doing well! Here is your personalised call audit feedback for the week.\n\n`;
+  body+=`Overall average score: ${overall.toFixed(1)} / ${MAX} (${pct}%)\nTotal audits: ${rmData.n}\n\n`;
+  body+=`=== SCORECARD ===\n`;
+  Object.entries(dateGroups).forEach(([date,rows])=>{
+    body+=`\n${date}:\n`;
+    rows.forEach((r,idx)=>{
+      const tot=PARAMS.reduce((s,p)=>s+(+r[p]||0),0);
+      body+=`  Call ${idx+1}: ${PARAMS.map((p,i)=>PLABELS[i].split(' ')[0]+': '+r[p]).join(' | ')} | Total: ${tot}/${MAX*PARAMS.length}\n`;
+    });
+  });
+  body+=`\n=== PARAMETER AVERAGES ===\n`;
+  PARAMS.forEach((p,i)=>{body+=`${PLABELS[i]}: ${paramAvgs[i].toFixed(1)} / ${MAX}\n`;});
+  if(weak.length>0){
+    body+=`\n=== AREAS TO IMPROVE ===\n`;
+    weak.forEach(({p,i})=>{
+      body+=`\n${PLABELS[i]}:\n${PARAM_ADVICE[p]}\n\nSample pitch:\n${PITCHES[p]}\n`;
+    });
+  }
+  body+=`\n=== YOUR ACTION THIS WEEK ===\nPlease reply to this email with your reworked pitch for your weakest area. Write it in your own words — something you would actually say on a call. Your TL will review and share feedback.\n\n`;
+  body+=`Keep at it — you are closer to your targets than you think.\n\nWarm regards,\nRohit Bhandage\nSquare Yards | Quality & Training`;
+
+  const subject=`Your Call Audit Feedback — ${Object.keys(dateGroups).join(' & ')} | Square Yards`;
+  const mailto=`mailto:${toEmail}?cc=${encodeURIComponent(ccList)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto,'_blank');
+}
+
 function render(){
   const data=getFiltered();
   const rmMap={};
   data.forEach(r=>{
     if(!r.rm) return;
-    if(!rmMap[r.rm]) rmMap[r.rm]={rm:r.rm,t2:r.t2,t3:r.t3,n:0,s:{}};
+    if(!rmMap[r.rm]) rmMap[r.rm]={rm:r.rm,t2:r.t2,t3:r.t3,n:0,s:{},audits:[]};
     rmMap[r.rm].n++;
+    rmMap[r.rm].audits.push(r);
     PARAMS.forEach(p=>{if(!rmMap[r.rm].s[p])rmMap[r.rm].s[p]=[];rmMap[r.rm].s[p].push(+r[p]||0);});
   });
 
@@ -748,7 +625,7 @@ function render(){
   const allO=rms.map(r=>getO(r));
   const ga=avg(allO);
   const ta=rms.reduce((s,r)=>s+r.n,0);
-  const top=rms[0], low=rms[rms.length-1];
+  const top=rms[0],low=rms[rms.length-1];
 
   document.getElementById('kRMs').textContent=rms.length;
   document.getElementById('kAudits').textContent=ta;
@@ -757,45 +634,69 @@ function render(){
   document.getElementById('kLow').textContent=low&&rms.length>1?fmtName(low.rm).split(' ')[0]+' ('+getO(low).toFixed(1)+')':'—';
   document.getElementById('cardCount').textContent=rms.length+' RMs';
 
-  if(!rms.length){
-    document.getElementById('grid').innerHTML='<div class="empty-state">No RMs match current filters.</div>';
-    return;
-  }
+  if(!rms.length){document.getElementById('grid').innerHTML='<div class="empty-state">No RMs match current filters.</div>';return;}
 
   document.getElementById('grid').innerHTML=rms.map((r,idx)=>{
     const pa=PARAMS.map(p=>avg(r.s[p]||[0]));
-    const ov=avg(pa);
-    const pct=ov/MAX;
-    const p100=pct*100;
+    const ov=avg(pa),pct=ov/MAX,p100=pct*100;
     const rl=p100>=67?'Good':p100>=40?'Average':'Needs work';
     const rc=p100>=67?'r-good':p100>=40?'r-avg':'r-low';
     const pal=PALETTES[idx%PALETTES.length];
     const t2n=T2L[r.t2]||r.t2||'—';
     const delay=(idx%12)*0.04;
+    const rmKey=r.rm;
+    const safeKey=rmKey.replace(/[^a-z0-9]/gi,'_');
+
+    const dateGroups={};
+    r.audits.forEach(a=>{if(!dateGroups[a.date])dateGroups[a.date]=[];dateGroups[a.date].push(a);});
+
+    const datesHTML=Object.entries(dateGroups).map(([date,rows])=>`
+      <div class="date-group">
+        <div class="date-group-header">
+          <span>${date}</span>
+          <span class="date-chip">${rows.length} call${rows.length!==1?'s':''}</span>
+        </div>
+        ${rows.map((row,i)=>{
+          const tot=PARAMS.reduce((s,p)=>s+(+row[p]||0),0);
+          return`<div class="lead-row">
+            <span style="font-size:11px;color:var(--text2);">Call ${i+1}</span>
+            <div class="lead-score">
+              ${PARAMS.map((p,pi)=>`<span class="score-chip ${scoreClass(+row[p]||0)}" title="${PLABELS[pi]}">${PLABELS[pi].slice(0,3)} ${row[p]}</span>`).join('')}
+            </div>
+            <span class="lead-total">${tot}/${MAX*PARAMS.length}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    `).join('');
 
     const metricRows=PARAMS.map((p,i)=>{
-      const a=pa[i], mp=a/MAX, col=barColor(mp), bw=Math.round(mp*100);
-      return `<div class="metric-row">
-        <span class="metric-name">${PLABELS[i]}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${bw}%;background:${col}"></div></div>
-        <span class="metric-val" style="color:${col}">${a.toFixed(1)}</span>
-      </div>`;
+      const a=pa[i],mp=a/MAX,col=barColor(mp),bw=Math.round(mp*100);
+      return`<div class="metric-row"><span class="metric-name">${PLABELS[i]}</span><div class="bar-track"><div class="bar-fill" style="width:${bw}%;background:${col}"></div></div><span class="metric-val" style="color:${col}">${a.toFixed(1)}</span></div>`;
     }).join('');
 
-    return `<div class="card fade-in" style="animation-delay:${delay}s;opacity:0" role="listitem">
+    return`<div class="card fade-in" style="animation-delay:${delay}s;opacity:0" role="listitem">
       <div class="card-head">
         <div class="card-id">
-          <div class="avatar" style="background:${pal.bg};color:${pal.tx}">${initials(r.rm)}</div>
+          <div class="avatar" style="background:${pal.bg};color:${pal.tx}">${initials(rmKey)}</div>
           <div>
-            <div class="card-name">${fmtName(r.rm)}</div>
+            <div class="card-name">${fmtName(rmKey)}</div>
             <div class="card-meta">${t2n}</div>
           </div>
         </div>
-        <span class="rating ${rc}">${rl}</span>
+        <div class="card-actions">
+          <span class="rating ${rc}">${rl}</span>
+          <button class="icon-btn email-btn" onclick="openEmail('${rmKey}',window._rmMap&&window._rmMap['${safeKey}'])" title="Send feedback email" aria-label="Send feedback email to ${fmtName(rmKey)}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </button>
+        </div>
       </div>
       <div class="audit-row">
         <span class="audit-label">Audits</span>
-        <span class="audit-pill">${r.n} audit${r.n!==1?'s':''}</span>
+        <span class="audit-pill" id="ap-${safeKey}" onclick="toggleAudits('${safeKey}')" title="Click to view audit breakdown">${r.n} audit${r.n!==1?'s':''} ▾</span>
+      </div>
+      <div class="dates-panel" id="dp-${safeKey}">
+        <div class="dates-title">Audited calls by date</div>
+        ${datesHTML}
       </div>
       <div class="score-box">
         <span class="score-label">Overall avg</span>
@@ -808,6 +709,19 @@ function render(){
       <div class="metrics">${metricRows}</div>
     </div>`;
   }).join('');
+
+  window._rmMap={};
+  rms.forEach(r=>{
+    const safeKey=r.rm.replace(/[^a-z0-9]/gi,'_');
+    window._rmMap[safeKey]=r;
+  });
+  document.querySelectorAll('.icon-btn.email-btn').forEach(btn=>{
+    const rmKey=btn.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    const safeKey=btn.getAttribute('onclick').match(/window\._rmMap&&window\._rmMap\['([^']+)'\]/)?.[1];
+    if(rmKey&&safeKey){
+      btn.onclick=()=>openEmail(rmKey,window._rmMap[safeKey]);
+    }
+  });
 }
 
 function scheduleRefresh(){
