@@ -276,6 +276,7 @@
       padding:12px 13px;
       min-height:44px;
     }
+    .input-money input{ padding-left:38px; }
     .switch{ width:46px; height:27px; }
     .switch .slider::before{ height:21px; width:21px; }
     .switch input:checked + .slider::before{ transform:translateX(19px); }
@@ -329,12 +330,44 @@
   .input-money::before{
     content:"₹";
     position:absolute;
-    left:13px; top:50%; transform:translateY(-50%);
+    left:14px; top:50%; transform:translateY(-50%);
     color:var(--muted);
     font-family:'IBM Plex Mono', monospace;
     font-size:14px;
+    pointer-events:none;
   }
-  .input-money input{ padding-left:30px; }
+  .input-money input{ padding-left:38px; }
+
+  .month-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:8px;
+  }
+  .month-cell{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .month-cell .mlabel{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--muted);
+  }
+  .month-cell .input-money input{
+    padding:8px 10px 8px 30px;
+    font-size:13px;
+  }
+  .month-cell .input-money::before{ left:10px; font-size:12px; }
+  .month-cell input:disabled{
+    background:var(--paper-2);
+    color:var(--muted);
+    cursor:not-allowed;
+  }
+  @media (max-width: 460px){
+    .month-grid{ grid-template-columns:repeat(2, 1fr); }
+  }
 
   input[type=number], input[type=date], input[type=text]{
     width:100%;
@@ -779,11 +812,20 @@
         <input type="text" id="empName" placeholder="e.g. Aditi Sharma">
       </div>
 
-      <div class="field">
+      <div class="field" id="standardCostSection">
         <label id="costLabel" for="costInput">Current CTC (Annual)</label>
         <div class="input-money">
           <input type="number" id="costInput" value="400000" min="0" step="1000">
         </div>
+      </div>
+
+      <div class="field" id="t2MonthlyCostSection" style="display:none;">
+        <label>Team Cost — month by month (FY Apr–Mar)</label>
+        <div class="hint" style="margin-top:-2px; margin-bottom:10px;">Cost changes month to month — enter each month as it's known. Tick "add to rest of the months ahead" on a month once its cost is set and won't change, and it'll carry forward into every empty month after it.</div>
+
+        <div class="month-list" id="monthGrid"></div>
+
+        <div class="hint" style="margin-top:10px;">FY total team cost: <b id="monthlyCostTotal" style="color:var(--ink); font-family:'IBM Plex Mono', monospace;">₹0</b></div>
       </div>
 
       <div id="dojSection">
@@ -812,7 +854,7 @@
         </div>
       </div>
 
-      <div class="field" style="margin-bottom:4px;">
+      <div class="field" id="dealCountSection" style="margin-bottom:4px;">
         <label for="dealInput">Deal count</label>
         <input type="number" id="dealInput" value="5" min="0" step="1">
         <div class="hint">Used only to show average deal size — doesn't affect the incentive math.</div>
@@ -998,6 +1040,10 @@
     const cfg = TIERS[tierKey];
     $('costLabel').textContent = cfg.costLabel;
 
+    const isT2 = tierKey === 'T2';
+    $('standardCostSection').style.display = isT2 ? 'none' : 'block';
+    $('t2MonthlyCostSection').style.display = isT2 ? 'block' : 'none';
+
     const dojApplicable = tierKey === 'T0/T1';
     $('dojSection').style.display = dojApplicable ? 'block' : 'none';
     $('prorateToggle').checked = dojApplicable && cfg.prorateDefault;
@@ -1011,9 +1057,64 @@
     $('dojField').style.display = show ? 'block' : 'none';
   }
 
+  // ===== T2 12-month cost entry =====
+  const FY_MONTHS = ["Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar"];
+
+  function buildMonthGrid(){
+    const grid = $('monthGrid');
+    const defaultMonthly = Math.round(400000 / 12);
+    FY_MONTHS.forEach((m, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'month-cell';
+      cell.innerHTML = `
+        <span class="mlabel">${m}</span>
+        <div class="input-money">
+          <input type="number" class="month-input" id="month-${i}" data-idx="${i}" value="${defaultMonthly}" min="0" step="500">
+        </div>`;
+      grid.appendChild(cell);
+    });
+    grid.querySelectorAll('.month-input').forEach(inp => {
+      inp.addEventListener('input', onMonthInputChange);
+    });
+    applyMonthlySync();
+  }
+
+  function onMonthInputChange(e){
+    const idx = parseInt(e.target.dataset.idx, 10);
+    if ($('syncMonthlyCost').checked && idx === 0){
+      const val = e.target.value;
+      for (let i = 1; i < 12; i++){ $('month-' + i).value = val; }
+    }
+    render();
+  }
+
+  function applyMonthlySync(){
+    const sync = $('syncMonthlyCost').checked;
+    if (sync){
+      const month0Val = $('month-0').value;
+      for (let i = 1; i < 12; i++){
+        const el = $('month-' + i);
+        el.value = month0Val;
+        el.disabled = true;
+      }
+    } else {
+      for (let i = 1; i < 12; i++){ $('month-' + i).disabled = false; }
+    }
+    render();
+  }
+
+  function getT2MonthlyTotal(){
+    let total = 0;
+    for (let i = 0; i < 12; i++){
+      total += parseFloat($('month-' + i).value) || 0;
+    }
+    return total;
+  }
+
   function render(){
     const cfg = TIERS[currentTier];
-    const cost = parseFloat($('costInput').value) || 0;
+    const isT2 = currentTier === 'T2';
+    const cost = isT2 ? getT2MonthlyTotal() : (parseFloat($('costInput').value) || 0);
     const revenue = parseFloat($('revenueInput').value) || 0;
     const dealCount = parseFloat($('dealInput').value) || 0;
     const esopPct = 20; // fixed across all tiers
@@ -1031,9 +1132,16 @@
       prorationNoteText = `Joined ${doj.getDate()} ${monthNames[doj.getMonth()]} ${doj.getFullYear()} → counted ${monthNames[doj.getMonth()]} through March = ${months} month${months === 1 ? '' : 's'}.`;
       $('prorationNote').textContent = prorationNoteText;
       $('prorationNote').classList.add('show');
+    } else if (isT2){
+      costFormulaText = 'Sum of 12 monthly team costs (Apr – Mar)';
+      $('prorationNote').classList.remove('show');
     } else {
       costFormulaText = 'Full annual cost, no proration';
       $('prorationNote').classList.remove('show');
+    }
+
+    if (isT2){
+      $('monthlyCostTotal').textContent = inr(cost);
     }
 
     const target = effectiveCost * cfg.multiplier;
@@ -1104,6 +1212,7 @@
     $(id).addEventListener('input', render);
   });
   $('prorateToggle').addEventListener('change', () => { toggleDojField(); render(); });
+  $('syncMonthlyCost').addEventListener('change', applyMonthlySync);
 
   $('copyBtn').addEventListener('click', () => {
     const cfg = TIERS[currentTier];
@@ -1141,6 +1250,7 @@
     d.setMonth(d.getMonth() - 2);
     $('dojInput').value = d.toISOString().substring(0,10);
     toggleDojField();
+    buildMonthGrid();
     render();
   })();
 </script>
